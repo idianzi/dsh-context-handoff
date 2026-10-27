@@ -1,6 +1,6 @@
 {
   "name": "dsh-context-handoff",
-  "version": "0.2.1",
+  "version": "0.2.4",
   "description": "Token-aware context handoff for DeepSeek Harness: summarize a long session into a Markdown file, compare continue-versus-switch token costs, switch auto mode from the sidebar, and resume in a fresh session.",
   "type": "module",
   "main": "lib/index.js",

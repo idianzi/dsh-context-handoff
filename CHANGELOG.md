@@ -4,6 +4,15 @@ All notable changes to `dsh-context-handoff` are documented here. The format fol
 
 ## [Unreleased]
 
+## [0.2.4] — 2026-10-27
+
+### Fixed
+
+- The sidebar panel resolves its session from its own right-sidebar DOM owner (`closest('[data-sidebar-right-session]')`) before falling back to a visible owner or main-view retention. A tab that mounted before retention, or a background session kept mounted, can no longer steal the switch or poll a stale session.
+- Added a brief retry poll while the session marker is not written yet.
+- Added a loading state, a visible text toggle (`开启自动总结` / `关闭自动总结`), an unavailable-state label, and a retry button, so the panel no longer reports "已关闭" before it has read the host state or when the request fails.
+- Warn when the current context is already past the recommendation point, so enabling auto mode is not a surprise.
+
 ## [0.2.1] — 2026-10-27
 
 ### Fixed
@@ -59,7 +68,8 @@ All notable changes to `dsh-context-handoff` are documented here. The format fol
 
 - DSH Desktop 0.2.1-rc.3: bundle composition, config-schema import, plugin load, and `/handoff` command registration in a disposable Web profile. Command execution, model calls, fallback, and ledger behavior are covered by the test suite with stubbed services.
 
-[Unreleased]: https://github.com/idianzi/dsh-context-handoff/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/idianzi/dsh-context-handoff/compare/v0.2.4...HEAD
+[0.2.4]: https://github.com/idianzi/dsh-context-handoff/releases/tag/v0.2.4
 [0.2.1]: https://github.com/idianzi/dsh-context-handoff/releases/tag/v0.2.1
 [0.2.0]: https://github.com/idianzi/dsh-context-handoff/releases/tag/v0.2.0
 [0.1.0]: https://github.com/idianzi/dsh-context-handoff/releases/tag/v0.1.0

@@ -113,7 +113,7 @@ npm view dsh-context-handoff version dist.tarball
 ## 5. Install from the registry
 
 ```sh
-dsh plugin --profile web add dsh-context-handoff@0.2.1
+dsh plugin --profile web add dsh-context-handoff@0.2.4
 ```
 
 For Desktop, use **Plugins → Discover** (or the plugin manager) rather than editing the reserved Desktop profile while the app is running. Confirm `/handoff help` after the reload.
@@ -162,7 +162,7 @@ and install from the Discover tab or with `plugin_market` / `plugin_manager` in 
 - [ ] `dsh.compatibility.dshReleases` includes the exact tested version.
 - [ ] README install commands use the published name.
 - [ ] `repository`, `homepage`, `bugs` are real.
-- [ ] Git tag `v0.2.1` pushed.
+- [ ] Git tag `v0.2.4` pushed.
 - [ ] `CHANGELOG.md` has the release entry.
 - [ ] Published tarball installs in a disposable profile.
 - [ ] Market PR opened.
