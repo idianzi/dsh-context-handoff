@@ -55,7 +55,7 @@ Verify with `/handoff help`. The command requires the `dsh-commands` UI adapter;
 
 ### Sidebar panel
 
-Open the right sidebar's add menu and pick **上下文交接 / Context Handoff**:
+Next to the session title there is a small chip — **上下文 545k**, or **自动总结 545k** while auto mode is on. Clicking it expands the right sidebar and opens the handoff panel, so you do not have to know where the sidebar is. You can also open it from the right sidebar's add menu: **上下文交接 / Context Handoff**.
 
 - The switch controls auto mode for the current workspace. It is stored in `.dsh/handoff/auto.json` and survives restarts.
 - The panel shows current context, the recommendation point, a progress bar, and buttons for file-only or file-plus-new-session.

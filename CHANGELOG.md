@@ -4,6 +4,16 @@ All notable changes to `dsh-context-handoff` are documented here. The format fol
 
 ## [Unreleased]
 
+## [0.2.5] — 2026-10-27
+
+### Added
+
+- A session-header chip (`上下文 545k`, or `自动总结 545k` while auto mode is on) registered at `conversation.session.header.actions`. It shows the current context size, turns amber past the recommendation point, and opens the handoff panel on click — so the switch is reachable without knowing that the right sidebar exists.
+
+### Fixed
+
+- The panel now takes its session from the slot framework's session-scoped `sessionId` prop first and only falls back to DOM lookup, so a panel that mounts before the sidebar writes its marker can no longer show "先打开一个会话" or the wrong session.
+
 ## [0.2.4] — 2026-10-27
 
 ### Fixed

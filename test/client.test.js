@@ -50,11 +50,13 @@ test('client bundle registers a sidebar tab and pane body', async () => {
     },
     slots: {
       inject(name, callback) {
-        captured.slot = name
+        captured.calls = captured.calls ?? []
+        captured.calls.push(name)
         return callback()
       },
       register(value, component) {
-        captured.pane = { value, component }
+        captured.registered = captured.registered ?? []
+        captured.registered.push({ value, component })
         return () => {}
       },
     },
@@ -73,7 +75,12 @@ test('client bundle registers a sidebar tab and pane body', async () => {
   assert.equal(captured.tab.kind, 'context-handoff')
   assert.equal(captured.tab.title(), '上下文交接')
   assert.equal(captured.tab.guide[0].title(), '上下文交接')
-  assert.equal(captured.slot, 'sidebar.right.pane.tab')
-  assert.equal(captured.pane.value.key, 'dsh-context-handoff/panel')
-  assert.equal(typeof captured.pane.component, 'function')
+  assert.ok(exports.inject.includes('sidebarRight'))
+  assert.deepEqual(captured.calls, ['sidebar.right.pane.tab', 'conversation.session.header.actions'])
+  const pane = captured.registered.find((entry) => entry.value.name === 'sidebar.right.pane.tab')
+  const chip = captured.registered.find((entry) => entry.value.name === 'conversation.session.header.actions')
+  assert.equal(pane.value.key, 'dsh-context-handoff/panel')
+  assert.equal(typeof pane.component, 'function')
+  assert.equal(chip.value.id, 'context-handoff')
+  assert.equal(typeof chip.component, 'function')
 })
