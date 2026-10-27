@@ -4,6 +4,13 @@ All notable changes to `dsh-context-handoff` are documented here. The format fol
 
 ## [Unreleased]
 
+## [0.3.2] — 2026-10-27
+
+### Fixed
+
+- **The compaction service is mounted per agent, not on the host plane.** DSH assembles each session from a preset, and the preset's isolated group owns `compaction` (`isolate: { compaction: true }`); a host-plane plugin can never see it through `ctx` or injection. The plugin now reads `agent.ctx.compaction`, per call and without caching, because two sessions may run under different presets with different backends. `compaction.source` reports `agent` when that path is used.
+- The panel payload now carries a `probe` (`agentCompaction`, `rootCompaction`) so a composition that genuinely lacks a backend is distinguishable from a lookup bug.
+
 ## [0.3.1] — 2026-10-27
 
 ### Fixed

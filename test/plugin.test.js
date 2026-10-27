@@ -438,3 +438,43 @@ test('plugin: a second concurrent condense for one session is ignored', async (t
   assert.ok(first !== undefined)
   assert.equal(second, undefined)
 })
+
+test('plugin: uses the compaction service mounted in the agent preset scope', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dsh-handoff-compact-agent-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const state = { tokens: 120000 }
+  const { ctx } = makeCtx()
+  ctx.tokenMeter = makeMutableMeter(state)
+  const plugin = new ContextHandoff(ctx, { outputDir: '.dsh/handoff', auto: true, autoCooldownMinutes: 0 })
+
+  const services = []
+  const agent = makeAgent(root)
+  agent.ctx = {
+    compaction: {
+      async compactNow() {
+        services.push('a')
+        state.tokens = 20000
+        return { shadowedTokenCount: 100000 }
+      },
+    },
+  }
+  await plugin.maybeAuto(agent)
+  assert.deepEqual(services, ['a'])
+  assert.equal(plugin.compactionSource, 'agent')
+
+  // A second session under another preset must get its own backend, not a cached one.
+  const other = { tokens: 120000 }
+  ctx.tokenMeter = makeMutableMeter(other)
+  const second = makeAgent(root, { session: { ...agent.session, id: 'sess-other-5678' } })
+  second.ctx = {
+    compaction: {
+      async compactNow() {
+        services.push('b')
+        other.tokens = 20000
+        return { shadowedTokenCount: 100000 }
+      },
+    },
+  }
+  await plugin.maybeAuto(second)
+  assert.deepEqual(services, ['a', 'b'])
+})
