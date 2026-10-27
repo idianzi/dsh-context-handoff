@@ -1,0 +1,8 @@
+# Catalog entry for https://github.com/awesome-dsh-plugin/awesome-dsh-plugin
+# Save as data/plugins/idianzi__dsh-context-handoff.yml
+url: https://github.com/idianzi/dsh-context-handoff
+name: idianzi/dsh-context-handoff
+category: session
+description:
+  en: Token-aware context handoff for DSH with a sidebar switch: summarize a long session into a Markdown file, compare continue-versus-switch token costs, and automatically start a fresh session at the recommended threshold.
+  zh: 带侧边栏开关的 DSH token 感知上下文交接：把长会话总结成 Markdown 文件，比较继续与开新会话的 token 成本，达到推荐阈值时自动开始新会话并续接。

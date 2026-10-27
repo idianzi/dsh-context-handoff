@@ -1,0 +1,104 @@
+{
+  "name": "dsh-context-handoff",
+  "version": "0.2.0",
+  "description": "Token-aware context handoff for DeepSeek Harness: summarize a long session into a Markdown file, compare continue-versus-switch token costs, switch auto mode from the sidebar, and resume in a fresh session.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "docs",
+    "examples",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "deepseek-harness",
+    "deepseek",
+    "dsh",
+    "dsh-plugin",
+    "cordis",
+    "context",
+    "handoff",
+    "summary",
+    "compaction",
+    "session",
+    "token"
+  ],
+  "license": "MIT",
+  "author": "dsh-context-handoff contributors",
+  "engines": {
+    "node": ">=20.3.0",
+    "dsh": ">=0.2.1-rc.3 <0.3.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "compatibility": {
+      "dshReleases": {
+        "0.2.1-rc.3": "compatible"
+      },
+      "note": "Verified against DSH Desktop 0.2.1-rc.3: host bundle composition, config-schema import, plugin load, /handoff command registration, client bundle present in the Web boot graph and served from /plugins. Sidebar tab/pane registration is covered by the client bundle test; command execution, model calls, auto-state, and the new-session path are covered by the test suite with stubbed services."
+    },
+    "client": {
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.5 <5",
+    "@deepseek-ai/dsh-commands": ">=0.2.1-rc.3 <0.3.0",
+    "@deepseek-ai/dsh-llm": ">=0.2.1-rc.3 <0.3.0",
+    "@deepseek-ai/dsh-session": ">=0.2.1-rc.3 <0.3.0",
+    "@deepseek-ai/dsh-token-meter": ">=0.2.1-rc.3 <0.3.0",
+    "@deepseek-ai/schemastery": ">=3.18.1 <4"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": false
+    },
+    "@deepseek-ai/dsh-commands": {
+      "optional": false
+    },
+    "@deepseek-ai/dsh-llm": {
+      "optional": false
+    },
+    "@deepseek-ai/dsh-session": {
+      "optional": false
+    },
+    "@deepseek-ai/dsh-token-meter": {
+      "optional": false
+    },
+    "@deepseek-ai/schemastery": {
+      "optional": false
+    }
+  },
+  "scripts": {
+    "test": "node --test",
+    "test:watch": "node --test --watch",
+    "pack:check": "npm pack --dry-run",
+    "check": "node --check lib/index.js && node --check lib/config.js && node --check lib/economics.js && node --check lib/digest.js && node --check lib/summarize.js && node --check lib/files.js && node --check lib/format.js && node --check lib/auto-state.js && node --check lib/http.js && node --check lib/client.js"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "@deepseek-ai/schemastery": "^3.18.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/idianzi/dsh-context-handoff.git"
+  },
+  "homepage": "https://github.com/idianzi/dsh-context-handoff#readme",
+  "bugs": {
+    "url": "https://github.com/idianzi/dsh-context-handoff/issues"
+  }
+}

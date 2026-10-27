@@ -1,0 +1,16 @@
+# dsh-context-handoff — bundle patch
+#
+# Applied when the package is selected in `dsh.profile.bundles`, after dsh-base.
+# Every value below is optional; the plugin's schema supplies the same defaults.
+# Override any of them from the profile's own cordis.patch.yml by entry id.
+- insert:
+    - id: context-handoff
+      name: dsh-context-handoff
+      config:
+        outputDir: .dsh/handoff
+        targetDigestTokens: 3000
+        recommendAtRatio: 0.55
+        recommendMaxTokens: 256000
+        horizonTurns: 8
+        auto: false
+        autoNewSession: true
