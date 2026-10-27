@@ -266,3 +266,125 @@ test('plugin: loads without a command registry so auto mode can still run', asyn
   await plugin.maybeAuto(agent)
   assert.equal((await readdir(path.join(root, '.dsh/handoff'))).filter((name) => name.endsWith('.md')).length, 1)
 })
+
+function makeMutableMeter(state) {
+  return {
+    measure: () => ({
+      totalTokens: state.tokens,
+      surfaceTokens: Math.max(0, state.tokens - 12000),
+      nodes: [],
+    }),
+    estimateMessage: (message) => Math.ceil(JSON.stringify(message.content).length / 4) + 4,
+  }
+}
+
+test('plugin: condenses an over-threshold session instead of handing it off', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dsh-handoff-compact-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const state = { tokens: 120000 }
+  const { ctx } = makeCtx()
+  ctx.tokenMeter = makeMutableMeter(state)
+  const plugin = new ContextHandoff(ctx, { outputDir: '.dsh/handoff', auto: true, autoCooldownMinutes: 0 })
+  let compactions = 0
+  plugin.compaction = {
+    async compactNow() {
+      compactions += 1
+      state.tokens = 20000
+      return { shadowedTokenCount: 92000 }
+    },
+  }
+  const agent = makeAgent(root)
+  await plugin.maybeAuto(agent)
+
+  assert.equal(compactions, 1)
+  // The session recovered below its recommendation point, so no handoff file.
+  await assert.rejects(readdir(path.join(root, '.dsh/handoff')), /ENOENT/)
+  const record = plugin.compactions.get(agent.session.id)
+  assert.equal(record.count, 1)
+  assert.equal(record.before, 120000)
+  assert.equal(record.after, 20000)
+  assert.equal(record.saved, 100000)
+})
+
+test('plugin: falls back to a handoff when condensing cannot free enough', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dsh-handoff-compact-fallback-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const state = { tokens: 120000 }
+  const { ctx } = makeCtx()
+  ctx.tokenMeter = makeMutableMeter(state)
+  const plugin = new ContextHandoff(ctx, { outputDir: '.dsh/handoff', auto: true, autoCooldownMinutes: 0 })
+  plugin.compaction = {
+    async compactNow() {
+      // Only a small reduction: the summary is not smaller enough to help.
+      state.tokens = 118000
+      return { shadowedTokenCount: 2000 }
+    },
+  }
+  const agent = makeAgent(root)
+  await plugin.maybeAuto(agent)
+
+  const dir = path.join(root, '.dsh/handoff')
+  assert.equal((await readdir(dir)).filter((name) => name.endsWith('.md')).length, 1)
+  // A condense that frees almost nothing ends this session's budget.
+  assert.equal(plugin.compactions.get(agent.session.id).count, plugin.config.maxCompactionsPerSession)
+})
+
+test('plugin: condensing stays automatic even when the handoff switch is off', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dsh-handoff-compact-noswitch-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const state = { tokens: 120000 }
+  const { ctx } = makeCtx()
+  ctx.tokenMeter = makeMutableMeter(state)
+  const plugin = new ContextHandoff(ctx, { outputDir: '.dsh/handoff', auto: false })
+  let compactions = 0
+  plugin.compaction = {
+    async compactNow() {
+      compactions += 1
+      state.tokens = 20000
+      return { shadowedTokenCount: 100000 }
+    },
+  }
+  const agent = makeAgent(root)
+  await plugin.maybeAuto(agent)
+
+  assert.equal(compactions, 1)
+  await assert.rejects(readdir(path.join(root, '.dsh/handoff')), /ENOENT/)
+})
+
+test('plugin: stops condensing after the per-session budget', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dsh-handoff-compact-budget-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const state = { tokens: 120000 }
+  const { ctx } = makeCtx()
+  ctx.tokenMeter = makeMutableMeter(state)
+  const plugin = new ContextHandoff(ctx, {
+    outputDir: '.dsh/handoff',
+    auto: true,
+    autoCooldownMinutes: 0,
+    autoMinGrowthTokens: 1,
+    maxCompactionsPerSession: 2,
+  })
+  let compactions = 0
+  plugin.compaction = {
+    async compactNow() {
+      compactions += 1
+      state.tokens = 20000
+      return { shadowedTokenCount: 100000 }
+    },
+  }
+  const agent = makeAgent(root)
+
+  // Cycle 1: condense, then the session grows back over the threshold.
+  await plugin.maybeAuto(agent)
+  assert.equal(compactions, 1)
+  state.tokens = 120000
+  await plugin.maybeAuto(agent)
+  assert.equal(compactions, 2)
+
+  // Cycle 3: budget is gone, so the fallback handoff runs instead.
+  state.tokens = 120000
+  await plugin.maybeAuto(agent)
+  assert.equal(compactions, 2)
+  const dir = path.join(root, '.dsh/handoff')
+  assert.equal((await readdir(dir)).filter((name) => name.endsWith('.md')).length, 1)
+})

@@ -57,7 +57,9 @@ Verify with `/handoff help`. The command requires the `dsh-commands` UI adapter;
 
 Next to the session title there is a small chip — **上下文 545k**, or **自动总结 545k** while auto mode is on. Clicking it expands the right sidebar and opens the handoff panel, so you do not have to know where the sidebar is. You can also open it from the right sidebar's add menu: **上下文交接 / Context Handoff**.
 
-- The switch controls auto mode for the current workspace. It is stored in `.dsh/handoff/auto.json` and survives restarts.
+- **Condensation is automatic and has no switch.** At the recommendation point the plugin calls the composition's compaction service (`ctx.compaction`, the same one `/compact` uses): up to `maxCompactionsPerSession` times per session (default 3), and it stops early when a condense frees less than 10% of the context.
+- **A handoff only runs when the context is still over the threshold after condensing.** That step is what the switch controls: off means condense only, on means write the file and start a new session.
+- The switch controls the new-session step of auto mode. It is stored in `.dsh/handoff/auto.json` and survives restarts.
 - The panel shows current context, the recommendation point, a progress bar, and buttons for file-only or file-plus-new-session.
 - When auto mode fires, the host writes the file, creates a new root session in the same workspace, and queues `Read @...` as its first message. The panel switches to it when the source session is the one on screen; otherwise it offers an **Open new session** button.
 - `autoNewSession: true` by default; set it to `false` to write files only.
@@ -162,6 +164,7 @@ A bundle install already inserts the row; use `- id: context-handoff` to overrid
 | `autoNewSession` | `true` | Auto mode creates a new session and queues the resume prompt. |
 | `autoMinGrowthTokens` | `8000` | Minimum growth between auto handoffs. |
 | `autoCooldownMinutes` | `10` | Cooldown between auto handoffs. |
+| `maxCompactionsPerSession` | `3` | How many automatic condensations one session may get; `0` disables automatic condensation. |
 | `provider` / `model` | empty | Summarization route; empty follows the routed request or agent options. Set both or neither. |
 | `maxOutputTokens` | `0` | Summary output cap; `0` derives it from the budget. |
 | `language` | `auto` | `auto`, `en`, or `zh`. |

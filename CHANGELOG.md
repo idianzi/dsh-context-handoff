@@ -4,6 +4,20 @@ All notable changes to `dsh-context-handoff` are documented here. The format fol
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-10-27
+
+### Added
+
+- **Automatic condensation at the recommendation point.** When a session crosses its recommendation threshold, the plugin calls the composition's compaction service (`ctx.compaction.compactNow`) before doing anything else. There is no switch for this step.
+- `maxCompactionsPerSession` (default `3`): a session is condensed at most this many times, each condense is logged with its before/after token counts, and a condense that frees less than 10% of the context ends the session's budget immediately instead of looping.
+- **The handoff is now the fallback, not the first step.** A handoff file and a new session are only produced when the context is still at or above the recommendation point after condensing. The workspace switch now gates this step only: off means condense but never switch sessions.
+- The panel reports how many automatic condensations a session has used and the tokens it moved (`before → after`).
+- Four tests covering condense-then-recover, condense-then-fallback, condense with the switch off, and the per-session budget.
+
+### Changed
+
+- The panel's subtitle and footer now describe the two-stage behavior.
+
 ## [0.2.5] — 2026-10-27
 
 ### Added
