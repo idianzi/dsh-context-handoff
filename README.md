@@ -18,6 +18,8 @@ dsh's `/compact` replaces older history with a summary **inside the same session
 
 This plugin answers a different question: **when is it worth leaving the session with a high-quality handoff?** Compaction keeps paying for its summary every turn; a handoff file is read once by a new session and the old 100k-token history is no longer re-sent. Writing too early wastes the summary cost and discards useful detail; writing too late has already paid for many oversized turns. The plugin computes where the break-even point is.
 
+The two are not exclusive. The plugin reuses `/compact` to condense first and only writes the handoff when the context is still over the threshold afterwards, so the cheap move happens before the expensive one.
+
 ## Install
 
 From the DSH plugin market once listed, or:
@@ -57,7 +59,8 @@ Verify with `/handoff help`. The command requires the `dsh-commands` UI adapter;
 
 Next to the session title there is a small chip — **上下文 545k**, or **自动总结 545k** while auto mode is on. Clicking it expands the right sidebar and opens the handoff panel, so you do not have to know where the sidebar is. You can also open it from the right sidebar's add menu: **上下文交接 / Context Handoff**.
 
-- **Condensation is automatic and has no switch.** At the recommendation point the plugin calls the composition's compaction service (`ctx.compaction`, the same one `/compact` uses): up to `maxCompactionsPerSession` times per session (default 3), and it stops early when a condense frees less than 10% of the context.
+- **Condensation is automatic and has no switch.** At the recommendation point the plugin condenses once with the same backend `/compact` uses (`compactNow` from `dsh-compaction-basic`), replacing older history with a single summary: up to `maxCompactionsPerSession` times per session (default 3), and it stops early when a condense frees less than 10% of the context.
+- That backend lives inside the session's preset group (`isolate: { compaction: true }`), so a host-plane plugin cannot reach `ctx.compaction`. The plugin therefore drives it through the official command — `ctx.commands.execute(agent, '/compact')` — whose handler runs inside that scope and calls the same backend. The panel's compaction row reports which route was used: `agent`, `context`, `command`, or `none`.
 - **A handoff only runs when the context is still over the threshold after condensing.** That step is what the switch controls: off means condense only, on means write the file and start a new session.
 - The switch controls the new-session step of auto mode. It is stored in `.dsh/handoff/auto.json` and survives restarts.
 - The panel shows current context, the recommendation point, a progress bar, and buttons for file-only or file-plus-new-session.

@@ -4,6 +4,11 @@ All notable changes to `dsh-context-handoff` are documented here. The format fol
 
 ## [Unreleased]
 
+### Changed (docs only)
+
+- `README.md` and `README.zh.md` now describe the route that actually runs instead of claiming a direct `ctx.compaction` call. On a desktop preset the backend sits inside the session's preset group, so a host-plane plugin can never reach it; the working path is the official `/compact` command through `ctx.commands.execute`. Both READMEs point at the panel's `source` field (`agent` / `context` / `command` / `none`) so a composition that genuinely lacks a backend is distinguishable from a lookup bug.
+- Validated against a running desktop profile at `0.3.4`: `compaction: { available: true, source: "command", probe: { commandExecute: "function" } }`. No code change ships with this entry.
+
 ## [0.3.4] — 2026-10-27
 
 ### Added
