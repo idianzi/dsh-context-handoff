@@ -478,3 +478,34 @@ test('plugin: uses the compaction service mounted in the agent preset scope', as
   await plugin.maybeAuto(second)
   assert.deepEqual(services, ['a', 'b'])
 })
+
+test('plugin: reaches an isolated compaction backend through the agent context getter', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dsh-handoff-compact-isolated-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const state = { tokens: 120000 }
+  const { ctx } = makeCtx()
+  ctx.tokenMeter = makeMutableMeter(state)
+  const plugin = new ContextHandoff(ctx, { outputDir: '.dsh/handoff', auto: true, autoCooldownMinutes: 0 })
+
+  let calls = 0
+  const service = {
+    async compactNow() {
+      calls += 1
+      state.tokens = 20000
+      return { shadowedTokenCount: 100000 }
+    },
+  }
+  const agent = makeAgent(root)
+  // Faithful to Cordis: the service is in an isolated scope, so the getter is
+  // the only reachable path; plain property access is not used.
+  agent.ctx = {
+    get(name) {
+      return name === 'compaction' ? service : undefined
+    },
+  }
+  await plugin.maybeAuto(agent)
+
+  assert.equal(calls, 1)
+  assert.equal(plugin.compactionSource, 'agent')
+  await assert.rejects(readdir(path.join(root, '.dsh/handoff')), /ENOENT/)
+})

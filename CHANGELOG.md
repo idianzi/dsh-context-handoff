@@ -4,6 +4,17 @@ All notable changes to `dsh-context-handoff` are documented here. The format fol
 
 ## [Unreleased]
 
+## [0.3.3] — 2026-10-27
+
+### Fixed
+
+- Reading `agent.ctx.compaction` as a property throws `cannot get property "compaction" without inject`, and the panel payload read `this.ctx.compaction` unguarded, so the whole `/state` request failed. The isolated backend is now reached through `agent.ctx.get('compaction')` — the inject-free lookup the compaction backend itself uses — and every diagnostic read is guarded.
+- `probe` now reports `agentGet` and the actual outcome of the agent-scoped lookup.
+
+### Added
+
+- Regression test for the isolated-scope lookup path.
+
 ## [0.3.2] — 2026-10-27
 
 ### Fixed
