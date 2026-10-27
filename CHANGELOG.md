@@ -4,6 +4,17 @@ All notable changes to `dsh-context-handoff` are documented here. The format fol
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-10-27
+
+### Fixed
+
+- **Automatic condensation never ran in the Desktop app.** The plugin only looked for the compaction service through `ctx.inject`, which never resolved in that composition, so `compaction.available` stayed `false` and every session fell back to a handoff. The service is now also resolved lazily through `ctx.get('compaction')` and `ctx.compaction` at every use, with the discovery path reported as `source` in the panel payload.
+- A second `maybeAuto` pass while a condensation was in flight could call `compactNow` on a busy agent. An in-flight per-session guard now ignores the duplicate, and a busy failure backs off for a minute instead of retrying immediately.
+
+### Added
+
+- Regression tests for context-based service discovery and for the concurrent-condense guard.
+
 ## [0.3.0] — 2026-10-27
 
 ### Added

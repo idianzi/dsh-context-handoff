@@ -388,3 +388,53 @@ test('plugin: stops condensing after the per-session budget', async (t) => {
   const dir = path.join(root, '.dsh/handoff')
   assert.equal((await readdir(dir)).filter((name) => name.endsWith('.md')).length, 1)
 })
+
+test('plugin: finds the compaction service through the context when injection misses it', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dsh-handoff-compact-lazy-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const state = { tokens: 120000 }
+  const { ctx } = makeCtx()
+  ctx.tokenMeter = makeMutableMeter(state)
+  const service = {
+    async compactNow() {
+      state.tokens = 20000
+      return { shadowedTokenCount: 100000 }
+    },
+  }
+  ctx.get = (name) => (name === 'compaction' ? service : undefined)
+  const plugin = new ContextHandoff(ctx, { outputDir: '.dsh/handoff', auto: true, autoCooldownMinutes: 0 })
+  const agent = makeAgent(root)
+  await plugin.maybeAuto(agent)
+
+  assert.equal(plugin.compaction, service)
+  assert.equal(plugin.compactionSource, 'context')
+  assert.equal(plugin.compactions.get(agent.session.id).count, 1)
+  await assert.rejects(readdir(path.join(root, '.dsh/handoff')), /ENOENT/)
+})
+
+test('plugin: a second concurrent condense for one session is ignored', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dsh-handoff-compact-race-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const state = { tokens: 120000 }
+  const { ctx } = makeCtx()
+  ctx.tokenMeter = makeMutableMeter(state)
+  const plugin = new ContextHandoff(ctx, { outputDir: '.dsh/handoff' })
+  let calls = 0
+  plugin.compaction = {
+    async compactNow() {
+      calls += 1
+      await new Promise((resolve) => setTimeout(resolve, 30))
+      state.tokens = 20000
+      return { shadowedTokenCount: 100000 }
+    },
+  }
+  const agent = makeAgent(root)
+  const snapshot = await plugin.inspect(agent)
+  const [first, second] = await Promise.all([
+    plugin.compactSession(agent, snapshot, agent.session.id),
+    plugin.compactSession(agent, snapshot, agent.session.id),
+  ])
+  assert.equal(calls, 1)
+  assert.ok(first !== undefined)
+  assert.equal(second, undefined)
+})
