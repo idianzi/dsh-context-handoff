@@ -4,6 +4,18 @@ All notable changes to `dsh-context-handoff` are documented here. The format fol
 
 ## [Unreleased]
 
+## [0.3.4] — 2026-10-27
+
+### Added
+
+- **Condensation can be driven through the official `/compact` command.** When the preset's backend is not reachable from the plugin (`agent.ctx.get('compaction')` returns nothing), the plugin executes `/compact` against the agent through `ctx.commands.execute`; that handler runs inside the preset scope and calls the same backend. It is the supported path when service isolation blocks a direct call.
+- The lookup also retries the non-strict form `ctx.get(name, false)`, which returns a provider whose fiber is still settling.
+- Tests for the command path and for a rejected `/compact` falling back to a handoff.
+
+### Changed
+
+- `compaction.available` is true when either the service or the command path exists, and `source` reports `agent`, `context`, `command`, or `none`.
+
 ## [0.3.3] — 2026-10-27
 
 ### Fixed

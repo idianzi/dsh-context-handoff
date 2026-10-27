@@ -509,3 +509,45 @@ test('plugin: reaches an isolated compaction backend through the agent context g
   assert.equal(plugin.compactionSource, 'agent')
   await assert.rejects(readdir(path.join(root, '.dsh/handoff')), /ENOENT/)
 })
+
+test('plugin: condenses through the official /compact command when the service is unreachable', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dsh-handoff-compact-cmd-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const state = { tokens: 120000 }
+  const { ctx } = makeCtx()
+  ctx.tokenMeter = makeMutableMeter(state)
+  const plugin = new ContextHandoff(ctx, { outputDir: '.dsh/handoff', auto: true, autoCooldownMinutes: 0 })
+
+  const lines = []
+  plugin.commands = {
+    async execute(agent, line) {
+      lines.push(line)
+      state.tokens = 20000
+      return { commandId: 'cmd-1', result: { kind: 'success', text: 'condensed' } }
+    },
+  }
+  const agent = makeAgent(root)
+  await plugin.maybeAuto(agent)
+
+  assert.deepEqual(lines, ['/compact'])
+  assert.equal(plugin.compactions.get(agent.session.id).count, 1)
+  await assert.rejects(readdir(path.join(root, '.dsh/handoff')), /ENOENT/)
+})
+
+test('plugin: a rejected /compact falls back to the handoff', async (t) => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'dsh-handoff-compact-cmd-fail-'))
+  t.after(() => rm(root, { recursive: true, force: true }))
+  const state = { tokens: 120000 }
+  const { ctx } = makeCtx()
+  ctx.tokenMeter = makeMutableMeter(state)
+  const plugin = new ContextHandoff(ctx, { outputDir: '.dsh/handoff', auto: true, autoCooldownMinutes: 0 })
+  plugin.commands = {
+    async execute() {
+      return { commandId: 'cmd-2', result: { kind: 'error', text: 'Compaction is unavailable' } }
+    },
+  }
+  const agent = makeAgent(root)
+  await plugin.maybeAuto(agent)
+
+  assert.equal((await readdir(path.join(root, '.dsh/handoff'))).filter((name) => name.endsWith('.md')).length, 1)
+})
