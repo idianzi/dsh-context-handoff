@@ -4,6 +4,15 @@ All notable changes to `dsh-context-handoff` are documented here. The format fol
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-10-27
+
+### Fixed
+
+- The sidebar panel resolves its session from the right-sidebar DOM marker first, then from `sessions.list` retention. A tab that mounted before the main-view retention was set no longer shows "先打开一个会话" forever.
+- Added a visible text toggle (`开启自动总结` / `关闭自动总结`) beside the small switch, and a loading state so the panel no longer says "已关闭" before the first state response.
+- State errors now show the error and a retry button instead of leaving the switch disabled with no explanation.
+- Added a brief poll when the session marker has not been written yet, instead of waiting for an unrelated session-list event.
+
 ## [0.2.0] — 2026-10-27
 
 ### Added
@@ -50,6 +59,7 @@ All notable changes to `dsh-context-handoff` are documented here. The format fol
 
 - DSH Desktop 0.2.1-rc.3: bundle composition, config-schema import, plugin load, and `/handoff` command registration in a disposable Web profile. Command execution, model calls, fallback, and ledger behavior are covered by the test suite with stubbed services.
 
-[Unreleased]: https://github.com/idianzi/dsh-context-handoff/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/idianzi/dsh-context-handoff/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/idianzi/dsh-context-handoff/releases/tag/v0.2.1
 [0.2.0]: https://github.com/idianzi/dsh-context-handoff/releases/tag/v0.2.0
 [0.1.0]: https://github.com/idianzi/dsh-context-handoff/releases/tag/v0.1.0
