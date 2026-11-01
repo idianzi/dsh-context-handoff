@@ -120,39 +120,45 @@ For Desktop, use **Plugins → Discover** (or the plugin manager) rather than ed
 
 ## 6. List it in the market
 
-The market reads the [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) catalog. Do **not** PR the market app repository.
+The market (`dshmarket` and the various storefronts) reads [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) — one YAML file per plugin under `data/plugins/`, published to `https://awesome-dsh-plugin.com/plugins.json`. Do **not** PR the market app repository, and do not edit the generated READMEs.
 
-1. Fork `awesome-dsh-plugin/awesome-dsh-plugin`.
-2. Add one file at `data/plugins/idianzi__dsh-context-handoff.yml` using the format below. The repository name and the npm package name do not have to match, but a `dsh.bundle` manifest in `package.json` is mandatory and is checked automatically.
-3. Open a PR. The README and the format-1 market index are regenerated after merge; do not edit the generated README by hand.
+Everything except the PR itself is already true for this repository:
 
-`data/plugins/idianzi__dsh-context-handoff.yml`:
+| Requirement | Status |
+|---|---|
+| `dsh.bundle` in `package.json` | yes, via `dsh.bundle.patch` → `cordis.patch.yml` |
+| `cordis.patch.yml` at the repo root | yes |
+| repo public and not archived | yes |
+| `dsh-plugin` topic | yes |
+| repo at least 1 day old (CI-enforced) | yes, created 2026-10-27 |
+| real code with tests | yes, `npm test` runs 50 tests |
 
-```yaml
-url: https://github.com/idianzi/dsh-context-handoff
-name: idianzi/dsh-context-handoff
-category: session
-description:
-  en: Token-aware context handoff for DSH: summarize a long session into a Markdown file, compare continue-versus-switch token costs, and resume in a fresh session.
-  zh: 面向 DSH 的 token 感知上下文交接：把长会话总结成 Markdown 文件，比较继续与开新会话的 token 成本，并在新会话中续接。
+Open the PR — no CLI needed:
+
+1. Go to <https://github.com/awesome-dsh-plugin/awesome-dsh-plugin> and click **Add file → Create new file**. GitHub forks the repository for you on the first commit.
+2. Name it `data/plugins/idianzi__dsh-context-handoff.yml`.
+3. Paste [`examples/awesome-dsh-plugin.yml`](../examples/awesome-dsh-plugin.yml). The catalog's `scripts/lib/entries.mjs` requires the filename to equal the URL slug (`owner__repo`), `name` to be `owner/repo`, `category` to come from its fixed set, and only the keys `url` / `name` / `category` / `description` / `icon` / `tarball`.
+4. Commit on a new branch and open the PR. One file is the whole submission; up to three entries per PR.
+
+With `gh` installed it collapses to a fork, a file, and one `gh pr create`.
+
+CI checks, in order: entry count ≤ 3, the `dsh.bundle` manifest, repo age ≥ 1 day, then `awesome-lint` and the site build. A failure names exactly what to change, and the fix goes on the same branch.
+
+Notes:
+
+- **The package name is already taken on the list.** `hunyu-feng/dsh-context-handoff` has been listed since 2026-10-23 under `session`, and it also hands a session over near a percentage threshold. Duplicate repo names are common there (470 of ~8100 entries share a basename) and the entry file here is `idianzi__dsh-context-handoff.yml`, so nothing collides mechanically. An overlapping entry survives on "whichever is better", so the description has to carry the difference: the cost model with break-even turns, condensing through the official `/compact` backend *before* switching, and the new-session switch. If a reviewer calls it a duplicate, the fallback is to rename the package (`dsh-handoff-advisor` is free on both npm and the list) and resubmit.
+- Descriptions are read as claims about the code. Keep command names and numbers exact — overstating is the one thing that gets an otherwise fine plugin bounced.
+- After merge the site rebuilds itself and CI refreshes `plugins.json` daily, so the market shows it within a day.
+
+## 6b. The install command users will see
+
+Source install works today and needs no registry:
+
+```sh
+dsh plugin --profile web add github:idianzi/dsh-context-handoff
 ```
 
-`examples/awesome-dsh-plugin.yml` is a copy of this entry with placeholders.
-
-Requirements from the catalog:
-
-- the repo declares `dsh.bundle` (this package does, via `dsh.bundle.patch`);
-- the repo is at least one day old;
-- the repo carries the `dsh-plugin` GitHub topic;
-- the entry is in the right category. `session` fits "Sessions & Messages"; `memory` or `tools` are plausible alternatives if the catalog maintainers prefer them.
-
-Once merged, users can add the index source in **Plugins → Discover → Index sources**:
-
-```text
-https://cdn.jsdelivr.net/npm/dsh-plugin-catalog/index.json
-```
-
-and install from the Discover tab or with `plugin_market` / `plugin_manager` in DSH.
+The npm path (`dsh plugin --profile web add dsh-context-handoff`) only works after step 4. Skip npm if you prefer; the catalog note says listing is unaffected either way, and a GitHub Release tarball is the prebuilt alternative.
 
 ## 7. Release checklist
 

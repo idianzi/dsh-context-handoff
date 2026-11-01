@@ -22,17 +22,19 @@ The two are not exclusive. The plugin reuses `/compact` to condense first and on
 
 ## Install
 
-From the DSH plugin market once listed, or:
+The package is not on npm yet, so install it from the repository:
 
 ```sh
-dsh plugin --profile web add dsh-context-handoff
+dsh plugin --profile web add github:idianzi/dsh-context-handoff
 ```
 
 Desktop users should install from **Plugins**; the CLI form works after the Desktop profile is initialized and the app is fully quit:
 
 ```sh
-dsh plugin --profile desktop add dsh-context-handoff
+dsh plugin --profile desktop add github:idianzi/dsh-context-handoff
 ```
+
+Once it is published to npm (see [docs/PUBLISHING.md](docs/PUBLISHING.md)) and listed in the market, `dsh plugin --profile web add dsh-context-handoff` works the same way.
 
 Local development:
 

@@ -29,17 +29,31 @@ dsh 自带的 `/compact`（compaction）把较早的历史替换成一条摘要�
 
 ## 安装
 
-### 从插件市场安装
+### 从 GitHub 安装（现在就能用）
 
-插件上架后，在 **Plugins → Discover** 搜索 `dsh-context-handoff` 安装即可。上架流程见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。
+插件还没发到 npm、也还没进市场，直接从仓库装：
 
-### 从 npm 安装
+```sh
+dsh plugin --profile web add github:idianzi/dsh-context-handoff
+```
+
+Desktop 版建议在 **Plugins** 页面安装；如果使用命令，Desktop 的 profile 需要先由应用初始化，并在操作前完全退出 Desktop：
+
+```sh
+dsh plugin --profile desktop add github:idianzi/dsh-context-handoff
+```
+
+### 从插件市场安装（上架后）
+
+上架后，在 **Plugins → Discover** 搜索 `dsh-context-handoff` 安装即可。上架流程见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。
+
+### 从 npm 安装（发布后）
 
 ```sh
 dsh plugin --profile web add dsh-context-handoff
 ```
 
-Desktop 版建议在 **Plugins** 页面安装；如果使用命令，Desktop 的 profile 需要先由应用初始化，并在操作前完全退出 Desktop：
+Desktop 版：
 
 ```sh
 dsh plugin --profile desktop add dsh-context-handoff

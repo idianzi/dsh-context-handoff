@@ -8,6 +8,9 @@ All notable changes to `dsh-context-handoff` are documented here. The format fol
 
 - `README.md` and `README.zh.md` now describe the route that actually runs instead of claiming a direct `ctx.compaction` call. On a desktop preset the backend sits inside the session's preset group, so a host-plane plugin can never reach it; the working path is the official `/compact` command through `ctx.commands.execute`. Both READMEs point at the panel's `source` field (`agent` / `context` / `command` / `none`) so a composition that genuinely lacks a backend is distinguishable from a lookup bug.
 - Validated against a running desktop profile at `0.3.4`: `compaction: { available: true, source: "command", probe: { commandExecute: "function" } }`. No code change ships with this entry.
+- `docs/PUBLISHING.md` gained the real market procedure: the catalog is `awesome-dsh-plugin/awesome-dsh-plugin`, one YAML file per plugin under `data/plugins/`, and the file is the whole submission. It records which requirements this repo already meets, the CI order (entry count → `dsh.bundle` → repo age → lint and site build), and that `hunyu-feng/dsh-context-handoff` already holds the name on the list.
+- `examples/awesome-dsh-plugin.yml` now describes the condense-then-handoff flow instead of only the file-writing half.
+- The install section of both READMEs points at `github:idianzi/dsh-context-handoff`, which works today; the npm form is marked as post-publication.
 
 ## [0.3.4] — 2026-10-27
 
